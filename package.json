@@ -1,0 +1,22 @@
+{
+  "name": "omni-oracle",
+  "version": "1.0.0",
+  "description": "Oracle for Omni Consumer Protocols",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/omni-corp-protocols/open-oracle.git"
+  },
+  "author": "Omni Consumer Protocols",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/omni-corp-protocols/open-oracle/issues"
+  },
+  "homepage": "https://github.com/omni-corp-protocols/open-oracle#readme",
+  "devDependencies": {
+    "hardhat": "^2.3.3"
+  }
+}
