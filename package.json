@@ -17,6 +17,11 @@
   },
   "homepage": "https://github.com/omni-corp-protocols/open-oracle#readme",
   "devDependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.0.2",
+    "ethers": "^5.3.1",
     "hardhat": "^2.3.3"
+  },
+  "dependencies": {
+    "dotenv": "^10.0.0"
   }
 }
