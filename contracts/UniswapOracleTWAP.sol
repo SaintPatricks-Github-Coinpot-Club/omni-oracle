@@ -108,6 +108,13 @@ contract UniswapOracleTWAP is UniswapConfig, PosterAccessControl {
         emit CTokenUnderlyingUpdated(cToken, config.underlying);
     }
 
+    function _setUnderlyingForCTokens(address[] memory _cTokens, address[] memory _underlyings) public {
+        require(_cTokens.length == _underlyings.length, "length mismatch");
+        for (uint i = 0; i < _cTokens.length; i++) {
+            _setUnderlyingForCToken(_cTokens[i], _underlyings[i]);
+        }
+    }
+
     /**
      * @notice Get the official price for a symbol
      * @param symbol The symbol to fetch the price of

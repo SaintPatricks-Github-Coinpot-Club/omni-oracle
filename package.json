@@ -23,6 +23,7 @@
     "jsonfile": "^6.1.0"
   },
   "dependencies": {
+    "bignumber.js": "^9.0.1",
     "dotenv": "^10.0.0"
   }
 }
