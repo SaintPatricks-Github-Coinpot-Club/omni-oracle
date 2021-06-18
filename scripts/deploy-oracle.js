@@ -1,5 +1,8 @@
 
 const hre = require("hardhat");
+const jsonfile = require('jsonfile')
+
+const outputFilePath = `./deployments/${hre.network.name}.json`;
 
 const deploymentParams = {
   anchorPeriod: 3600   // in seconds
@@ -20,6 +23,17 @@ async function main() {
   await oracle.deployed();
 
   console.log("UniswapOracleTWAP deployed to:", oracle.address);
+  saveAddress('UniswapOracleTWAP', oracle.address);
+}
+
+const saveAddress = (contractName, contractAddress) => {
+  let newData = { ...jsonfile.readFileSync(outputFilePath) };
+
+  if (!newData[contractName]) newData[contractName] = []
+  newData[contractName].push({
+    address: contractAddress
+  });
+  jsonfile.writeFileSync(outputFilePath, newData, { spaces: 2 });
 }
 
 main()

@@ -149,9 +149,20 @@ contract UniswapOracleTWAP is UniswapConfig, PosterAccessControl {
 
     /**
      * @notice Update oracle prices, and recalculate stored price by comparing to anchor
+     * @param cToken The cToken address
+     */
+    function updatePrice(address cToken) external {
+        address underlying = underlyings[cToken];
+        if (underlying != address(0)) {
+            updateUnderlyingPrice(underlying);
+        }
+    }
+    
+    /**
+     * @notice Update oracle prices, and recalculate stored price by comparing to anchor
      * @param underlying The underlying address
      */
-    function updatePrice(address underlying) external {
+    function updateUnderlyingPrice(address underlying) public {
         updateEthPrice();
         TokenConfig memory config = getTokenConfigByUnderlying(underlying);
 

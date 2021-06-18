@@ -19,7 +19,8 @@
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "ethers": "^5.3.1",
-    "hardhat": "^2.3.3"
+    "hardhat": "^2.3.3",
+    "jsonfile": "^6.1.0"
   },
   "dependencies": {
     "dotenv": "^10.0.0"
