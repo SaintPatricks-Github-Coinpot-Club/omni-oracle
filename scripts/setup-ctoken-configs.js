@@ -22,7 +22,7 @@ async function main() {
   for (let i = 0; i < configs.cTokenConfigs.cTokens.length; i++) {
     const cTokenAddr = configs.cTokenConfigs.cTokens[i];
     const oracleUnderlying = await OracleI.underlyings(cTokenAddr);
-    if (oracleUnderlying !== hre.ethers.constants.AddressZero) {
+    if (oracleUnderlying === hre.ethers.constants.AddressZero) {
       cTokens.push(configs.cTokenConfigs.cTokens[i]);
 
       const CErc20I = new hre.ethers.Contract(cTokenAddr, CErc20Abi, hre.ethers.provider.getSigner());
