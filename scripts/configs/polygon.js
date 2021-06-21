@@ -16,6 +16,7 @@
  */
 
 module.exports = {
+  twapWindow: "3600",   // in seconds
   UniswapV2Router: "0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506",
   basePriceDecimals: "6",
   tokenConfigs: [

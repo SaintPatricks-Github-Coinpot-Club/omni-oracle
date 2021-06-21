@@ -2,11 +2,8 @@
 const hre = require("hardhat");
 const jsonfile = require('jsonfile')
 
+const configs = require(`./configs/${hre.network.name}`);
 const outputFilePath = `./deployments/${hre.network.name}.json`;
-
-const deploymentParams = {
-  anchorPeriod: 3600   // in seconds
-}
 
 async function main() {
   const network = await hre.ethers.provider.getNetwork();
@@ -18,7 +15,7 @@ async function main() {
   }
 
   const UniswapOracleTWAP = await hre.ethers.getContractFactory("UniswapOracleTWAP");
-  const oracle = await UniswapOracleTWAP.deploy(deploymentParams.anchorPeriod, baseAsset);
+  const oracle = await UniswapOracleTWAP.deploy(configs.twapWindow, baseAsset);
 
   await oracle.deployed();
 
