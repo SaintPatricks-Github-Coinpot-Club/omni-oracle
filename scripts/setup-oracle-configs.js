@@ -61,7 +61,7 @@ const createConfig = async (config, configIndex) => {
 
   const erc20Decimals = await Erc20I.decimals();
   tokenConfig.baseUnit = numToWei("1", erc20Decimals);
-  
+
   const erc20Symbol = await Erc20I.symbol();
   if (!config.symbol) {
     tokenConfig.symbol = erc20Symbol;
@@ -92,6 +92,7 @@ const createConfig = async (config, configIndex) => {
         const factory = await RouterI.factory();
         const FactoryI = new hre.ethers.Contract(factory, FactoryAbi, hre.ethers.provider.getSigner());
         const pair = await FactoryI.getPair(weth, config.underlying);
+        if (pair === hre.ethers.constants.AddressZero) throw Error(`pair not found for ${tokenConfig.underlying} - ${tokenConfig.symbol}`);
         tokenConfig.uniswapMarket = pair;
 
         const PairI = new hre.ethers.Contract(pair, PairAbi, hre.ethers.provider.getSigner());
@@ -105,12 +106,12 @@ const createConfig = async (config, configIndex) => {
     }
 
     // POSTER
-    case '2' :{
+    case '2': {
       // nothing needs to be done here for now
       break;
     }
   }
-  
+
   return tokenConfig;
 }
 
