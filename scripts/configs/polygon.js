@@ -27,21 +27,26 @@ module.exports = {
       uniswapMarket: "0xcd353F79d9FADe311fC3119B841e1f456b54e858",
     },
     {
-      underlying: "0x0b3F868E0BE5597D5DB7fEB59E1CADBb0fdDa50a",
-      priceSource: "1",
-    },
-    {
       underlying: "0xC79358DE3868A7C751F52cFeECd650595AEE8B18",
       priceSource: "0",
       fixedPrice: "1",
+    },
+    {
+      underlying: "0x69f06e6549702038889e57eF5beB0d9378571c23",
+      priceSource: "2",
+    },
+    {
+      underlying: "0x0b3F868E0BE5597D5DB7fEB59E1CADBb0fdDa50a",
+      priceSource: "1",
     },
   ],
 
   cTokenConfigs: {
     cTokens: [
-      "0xEe5e0d307d65c594afdA6d4468D27461f5Ce4303",
-      "0xcAA9545478DbC974a9ddbd24665bf4692CaC76bd",
-      "0x85273F437E9447832Bf32Dd5E62165F3987F88D2",
+      "0x9Ec1CF937B4F62BC526D1F9023bc0a3826b02d83",
+      "0xb41f93d542F91D52cc7D797438534cDd05336F6C",
+      "0xa5BE1a46BB24572066FD61BD752EA4B2B0e2dFc3",
+      "0x739bfF3C077e75FdB0c236eEED0A92Aa1416eA81",
     ],
   }
 };
