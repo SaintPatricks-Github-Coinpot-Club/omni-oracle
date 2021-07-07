@@ -2,20 +2,16 @@
 const hre = require("hardhat");
 const jsonfile = require('jsonfile')
 
+const { numToWei } = require("../utils/ethUnitParser");
+
 const configs = require(`./configs/${hre.network.name}`);
 const outputFilePath = `./deployments/${hre.network.name}.json`;
 
 async function main() {
-  const network = await hre.ethers.provider.getNetwork();
-  let baseAsset;
-  if (network.chainId === 137) {
-    baseAsset = 'WMATIC';
-  } else if (network.chainId === 56) {
-    baseAsset = 'WBNB';
-  }
 
   const UniswapOracleTWAP = await hre.ethers.getContractFactory("UniswapOracleTWAP");
-  const oracle = await UniswapOracleTWAP.deploy(configs.twapWindow, baseAsset);
+  const basePricePrecision = numToWei("1", configs.basePriceDecimals);
+  const oracle = await UniswapOracleTWAP.deploy(configs.twapWindow, configs.baseAsset, basePricePrecision);
 
   await oracle.deployed();
 

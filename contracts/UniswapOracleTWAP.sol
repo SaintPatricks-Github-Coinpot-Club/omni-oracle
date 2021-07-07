@@ -49,13 +49,19 @@ contract UniswapOracleTWAP is UniswapConfig, PosterAccessControl {
     /// @notice The event emitted when the cToken underlying mapping is updated
     event CTokenUnderlyingUpdated(address cToken, address underlying);
 
+    /// @notice The precision factor of base asset's (ETH) price 
+    uint public basePricePrecision;
+
     string ETH;
     bytes32 public ethHash;
 
-    constructor(uint anchorPeriod_, string memory baseAsset) public {
+    constructor(uint anchorPeriod_, string memory baseAsset_, uint basePricePrecision_) public {
+        require(basePricePrecision_ <= 1e36, "basePricePrecision_ max limit exceeded");
+
         anchorPeriod = anchorPeriod_;
-        ETH = baseAsset;
+        ETH = baseAsset_;
         ethHash = keccak256(abi.encodePacked(ETH));
+        basePricePrecision = basePricePrecision_;
     }
 
     function _setConfig(TokenConfig memory config) public {
@@ -151,7 +157,8 @@ contract UniswapOracleTWAP is UniswapConfig, PosterAccessControl {
         TokenConfig memory config = getTokenConfigByUnderlying(underlyings[cToken]);
          // Comptroller needs prices in the format: ${raw price} * 1e(36 - baseUnit)
          // Since the prices in this view have 6 decimals, we must scale them by 1e(36 - 6 - baseUnit)
-        return mul(1e30, priceInternal(config)) / config.baseUnit;
+        uint factor = 1e36 / basePricePrecision;
+        return mul(factor, priceInternal(config)) / config.baseUnit;
     }
 
     /**
@@ -190,6 +197,15 @@ contract UniswapOracleTWAP is UniswapConfig, PosterAccessControl {
             uint ethPrice = prices[ethHash];
             // Try to update the storage
             updatePriceInternal(symbol, ethPrice);
+        }
+    }
+
+    /**
+     * @notice Open function to update all prices
+     */
+    function updateAllPrices() public {
+        for (uint i = 0; i < numTokens; i++) {
+            updateUnderlyingPrice(getTokenConfig(i).underlying);
         }
     }
 

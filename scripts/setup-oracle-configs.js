@@ -144,7 +144,9 @@ const setConfigsOnOracle = async (_detailedConfigs) => {
     console.log('No configs found to be added');
     return;
   }
-  const tx = await OracleI._setConfigs(toBeAddedConfigs);
+  const tx = await OracleI._setConfigs(toBeAddedConfigs, {
+    gasLimit: 2000000,
+  });
   console.log(`Configs set in txn: ${tx.hash}`)
   await tx.wait();
 }
