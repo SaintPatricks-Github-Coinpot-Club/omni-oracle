@@ -8,11 +8,11 @@ const configs = require(`./configs/${hre.network.name}`);
 const outputFilePath = `./deployments/${hre.network.name}.json`;
 
 async function main() {
+  console.log(`Deploying ${hre.network.name} TWAP with time period: ${configs.twapWindow / 60} minutes (${configs.twapWindow / 3600} hours)`)
 
   const UniswapOracleTWAP = await hre.ethers.getContractFactory("UniswapOracleTWAP");
   const basePricePrecision = numToWei("1", configs.basePriceDecimals);
   const oracle = await UniswapOracleTWAP.deploy(configs.twapWindow, configs.baseAsset, basePricePrecision);
-
   await oracle.deployed();
 
   console.log("UniswapOracleTWAP deployed to:", oracle.address);

@@ -16,7 +16,7 @@
  */
 
 module.exports = {
-  twapWindow: "3600",   // in seconds
+  twapWindow: "14400",   // in seconds
   baseAsset: "WBNB",
   UniswapV2Router: "0x10ED43C718714eb63d5aA57B78B54704E256024E",
   basePriceDecimals: "18",
@@ -41,11 +41,11 @@ module.exports = {
     },
     {
       underlying: "0x3C70260eEe0a2bFc4b375feB810325801f289fBd",
-      priceSource: "2",
+      priceSource: "1",
     },
     {
       underlying: "0xaBaE871B7E3b67aEeC6B46AE9FE1A91660AadAC5",
-      priceSource: "2",
+      priceSource: "1",
     },
     {
       underlying: "0x3dEB1119c295558c732a3618F04518b9812EC87A",
