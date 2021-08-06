@@ -30,11 +30,24 @@ async function main() {
       uniswapMarket: config.uniswapMarket,
       isUniswapReversed: config.isUniswapReversed,
       symbol: config.symbol,
+      externalOracle: config.externalOracle,
     }
     allConfigs.push(configDetails);
   }
   console.log("Deployed configs ==========================>");
   console.log(allConfigs);
+
+  const oraclePrices = [];
+
+  for (let i = 0; i < allConfigs.length; i++) {
+    const priceRaw = await OracleI["price(address)"](allConfigs[i].underlying);
+    oraclePrices.push({
+      symbol: allConfigs[i].symbol,
+      price: weiToNum(priceRaw, configs.basePriceDecimals),
+    });
+  }
+  console.log("Prices ==========================>");
+  console.table(oraclePrices)
 
   console.log(`\nFound ${configs.cTokenConfigs.cTokens.length} CToken configs.`);
   const priceData = [];
@@ -54,7 +67,7 @@ async function main() {
       'getUnderlyingPrice()': underlyingPrice
     });
   }
-  console.log("Prices ==========================>");
+  console.log("CToken Prices ==========================>");
   console.table(priceData)
 };
 

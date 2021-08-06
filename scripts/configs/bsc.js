@@ -9,9 +9,10 @@
  * NOTE - The first config is treated as the base config. For bsc it should be WBNB/stableCoin
  * 
  * Defining price source
- * 0 - FIXED_USD -> implies the fixedPrice is a constant multiple of the USD price (which is 1)
- * 1 - UNISWAP   -> implies the price is fetched from uniswap
- * 2 - POSTER    -> implies the price is posted externally
+ * 0 - FIXED_USD          -> implies the fixedPrice is a constant multiple of the USD price (which is 1)
+ * 1 - UNISWAP            -> implies the price is fetched from uniswap
+ * 2 - POSTER             -> implies the price is posted externally
+ * 3 - EXTERNAL_ORACLE    -> implies the price is read externally
  * 
  */
 
@@ -21,6 +22,7 @@ module.exports = {
   UniswapV2Router: "0x10ED43C718714eb63d5aA57B78B54704E256024E",
   basePriceDecimals: "18",
   tokenConfigs: [
+    // base config - WBNB/BUSD
     {
       underlying: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
       priceSource: "1",

@@ -14,9 +14,10 @@ contract UniswapConfig is Administrable {
 
     /// @dev Describe how to interpret the fixedPrice in the TokenConfig.
     enum PriceSource {
-        FIXED_USD, /// implies the fixedPrice is a constant multiple of the USD price (which is 1)
-        UNISWAP,   /// implies the price is fetched from uniswap
-        POSTER     /// implies the price is posted externally
+        FIXED_USD,          /// implies the fixedPrice is a constant multiple of the USD price (which is 1)
+        UNISWAP,            /// implies the price is fetched from uniswap
+        POSTER,             /// implies the price is posted externally
+        EXTERNAL_ORACLE     /// implies the price is read externally
     }
 
     /// @dev Describe how the USD price should be determined for an asset.
@@ -30,6 +31,7 @@ contract UniswapConfig is Administrable {
         address uniswapMarket;
         bool isUniswapReversed;
         string symbol;
+        address externalOracle;
     }
 
     /// @notice The max number of tokens this contract is hardcoded to support
@@ -50,14 +52,6 @@ contract UniswapConfig is Administrable {
         tokenConfigs[numTokens] = config;
         numTokens++;
     }
-
-    // function _updateConfigInternal(uint i, TokenConfig memory config) internal {
-    //     require(msg.sender == admin, "unauthorized");
-    //     require(tokenConfigs[i].underlying != address(0), "config not found");
-
-    //     emit ConfigUpdated(i, tokenConfigs[i], config, msg.sender);
-    //     tokenConfigs[i] = config;
-    // }
 
     function getUnderlyingIndex(address underlying) internal view returns (uint) {
         for (uint i = 0; i < numTokens; i++) {

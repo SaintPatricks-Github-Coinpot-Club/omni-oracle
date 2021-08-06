@@ -7,6 +7,7 @@ import "./UniswapConfig.sol";
 import "./PosterAccessControl.sol";
 
 import "./UniswapHelper.sol";
+import "./IExternalOracle.sol";
 
 struct Observation {
     uint timestamp;
@@ -82,6 +83,9 @@ contract UniswapOracleTWAP is UniswapConfig, PosterAccessControl {
         if (config.priceSource == PriceSource.FIXED_USD) {
             require(config.fixedPrice != 0, "fixedPrice must be greater than zero");
         }
+        if (config.priceSource == PriceSource.EXTERNAL_ORACLE) {
+            require(config.externalOracle != address(0), "must have external oracle");
+        }
     }
 
     function _setConfigs(TokenConfig[] memory configs) external {
@@ -145,6 +149,11 @@ contract UniswapOracleTWAP is UniswapConfig, PosterAccessControl {
         if (config.priceSource == PriceSource.UNISWAP) return prices[config.symbolHash];
         if (config.priceSource == PriceSource.FIXED_USD) return config.fixedPrice;
         if (config.priceSource == PriceSource.POSTER) return prices[config.symbolHash];
+        if (config.priceSource == PriceSource.EXTERNAL_ORACLE) {
+            uint8 oracleDecimals = IExternalOracle(config.externalOracle).decimals();
+            (, int256 answer, , , ) = IExternalOracle(config.externalOracle).latestRoundData();
+            return mul(uint256(answer), basePricePrecision) / (10 ** uint256(oracleDecimals));
+        }
     }
 
     /**

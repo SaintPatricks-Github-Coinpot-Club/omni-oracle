@@ -54,6 +54,7 @@ const createConfig = async (config, configIndex) => {
     uniswapMarket: hre.ethers.constants.AddressZero,
     isUniswapReversed: false,
     symbol: '',
+    externalOracle: hre.ethers.constants.AddressZero,
   };
 
   tokenConfig.underlying = config.underlying;
@@ -109,6 +110,17 @@ const createConfig = async (config, configIndex) => {
     case '2': {
       // nothing needs to be done here for now
       break;
+    }
+
+    // EXTERNAL_ORACLE
+    case '3': {
+      if (!config.externalOracle) throw Error(`externalOracle not provided for ${tokenConfig.underlying} - ${tokenConfig.symbol}`);
+      tokenConfig.externalOracle = config.externalOracle;
+      break;
+    }
+
+    default: {
+      throw Error(`invalid priceSource for ${tokenConfig.underlying} - ${tokenConfig.symbol}`)
     }
   }
 
