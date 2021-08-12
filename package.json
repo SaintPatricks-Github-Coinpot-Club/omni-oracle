@@ -10,14 +10,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/omni-corp-protocols/open-oracle.git"
+    "url": "git+https://github.com/omni-corp-protocols/omni-oracle.git"
   },
   "author": "Omni Consumer Protocols",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/omni-corp-protocols/open-oracle/issues"
+    "url": "https://github.com/omni-corp-protocols/omni-oracle/issues"
   },
-  "homepage": "https://github.com/omni-corp-protocols/open-oracle#readme",
+  "homepage": "https://github.com/omni-corp-protocols/omni-oracle#readme",
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "ethers": "^5.3.1",
