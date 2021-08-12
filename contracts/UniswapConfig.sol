@@ -30,8 +30,9 @@ contract UniswapConfig is Administrable {
         uint256 fixedPrice;
         address uniswapMarket;
         bool isUniswapReversed;
-        string symbol;
+        bool isPairWithStablecoin;
         address externalOracle;
+        string symbol;
     }
 
     /// @notice The max number of tokens this contract is hardcoded to support

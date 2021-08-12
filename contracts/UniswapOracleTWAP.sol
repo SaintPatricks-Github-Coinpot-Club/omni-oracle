@@ -8,6 +8,7 @@ import "./PosterAccessControl.sol";
 
 import "./UniswapHelper.sol";
 import "./IExternalOracle.sol";
+import "./IERC20Extended.sol";
 
 struct Observation {
     uint timestamp;
@@ -41,9 +42,6 @@ contract UniswapOracleTWAP is UniswapConfig, PosterAccessControl {
     /// @notice The event emitted when the stored price is updated
     event PriceUpdated(string symbol, uint price);
 
-    /// @notice The event emitted when anchor price is updated
-    event AnchorPriceUpdated(string symbol, uint anchorPrice, uint oldTimestamp, uint newTimestamp);
-
     /// @notice The event emitted when the uniswap window changes
     event UniswapWindowUpdated(bytes32 indexed symbolHash, uint oldTimestamp, uint newTimestamp, uint oldPrice, uint newPrice);
 
@@ -66,12 +64,23 @@ contract UniswapOracleTWAP is UniswapConfig, PosterAccessControl {
     }
 
     function _setConfig(TokenConfig memory config) public {
+        // already performs some checks
         _setConfigInternal(config);
 
         require(config.baseUnit > 0, "baseUnit must be greater than zero");
         if (config.priceSource == PriceSource.UNISWAP) {
             address uniswapMarket = config.uniswapMarket;
             require(uniswapMarket != address(0), "must have uni market");
+            if (config.isPairWithStablecoin) {
+                uint8 decimals;
+                // verify precision of quote currency (stablecoin)
+                if (IUniswapV2Pair(uniswapMarket).token0() == config.underlying) {
+                    decimals = IERC20(IUniswapV2Pair(uniswapMarket).token1()).decimals();
+                } else {
+                    decimals = IERC20(IUniswapV2Pair(uniswapMarket).token0()).decimals();
+                }
+                require(10 ** uint256(decimals) == basePricePrecision, "basePricePrecision mismatch");
+            }
             bytes32 symbolHash = config.symbolHash;
             uint cumulativePrice = currentCumulativePrice(config);
             oldObservations[symbolHash].timestamp = block.timestamp;
@@ -136,7 +145,7 @@ contract UniswapOracleTWAP is UniswapConfig, PosterAccessControl {
     }
 
     /**
-     * @notice Get the official price for an undelying asset
+     * @notice Get the official price for an underlying asset
      * @param underlying The address to fetch the price of
      * @return Price denominated in USD
      */
@@ -160,18 +169,17 @@ contract UniswapOracleTWAP is UniswapConfig, PosterAccessControl {
      * @notice Get the underlying price of a cToken
      * @dev Implements the PriceOracle interface for Compound v2.
      * @param cToken The cToken address for price retrieval
-     * @return Price denominated in USD, with 18 decimals, for the given cToken address
+     * @return Price denominated in USD for the given cToken address
      */
     function getUnderlyingPrice(address cToken) external view returns (uint) {
         TokenConfig memory config = getTokenConfigByUnderlying(underlyings[cToken]);
-         // Comptroller needs prices in the format: ${raw price} * 1e(36 - baseUnit)
-         // Since the prices in this view have 6 decimals, we must scale them by 1e(36 - 6 - baseUnit)
+        // Comptroller needs prices in the format: ${raw price} * 1e(36 - baseUnit)
         uint factor = 1e36 / basePricePrecision;
         return mul(factor, priceInternal(config)) / config.baseUnit;
     }
 
     /**
-     * @notice Update oracle prices, and recalculate stored price by comparing to anchor
+     * @notice Update oracle prices
      * @param cToken The cToken address
      */
     function updatePrice(address cToken) external {
@@ -180,16 +188,16 @@ contract UniswapOracleTWAP is UniswapConfig, PosterAccessControl {
             updateUnderlyingPrice(underlying);
         }
     }
-    
+
     /**
-     * @notice Update oracle prices, and recalculate stored price by comparing to anchor
+     * @notice Update oracle prices
      * @param underlying The underlying address
      */
     function updateUnderlyingPrice(address underlying) public {
         updateEthPrice();
         TokenConfig memory config = getTokenConfigByUnderlying(underlying);
 
-        if (config.symbolHash != ethHash && config.priceSource == PriceSource.UNISWAP) {
+        if (config.symbolHash != ethHash) {
             uint ethPrice = prices[ethHash];
             // Try to update the storage
             updatePriceInternal(config.symbol, ethPrice);
@@ -197,8 +205,8 @@ contract UniswapOracleTWAP is UniswapConfig, PosterAccessControl {
     }
 
     /**
-     * @notice Update oracle prices, and recalculate stored price by comparing to anchor
-     * @param symbol The symbol to compare to anchor
+     * @notice Update oracle prices
+     * @param symbol The underlying symbol
      */
     function updatePrice(string memory symbol) external {
         updateEthPrice();
@@ -235,8 +243,10 @@ contract UniswapOracleTWAP is UniswapConfig, PosterAccessControl {
             uint anchorPrice;
             if (symbolHash == ethHash) {
                 anchorPrice = ethPrice;
+            } else if (config.isPairWithStablecoin) {
+                anchorPrice = fetchAnchorPrice(config, ethBaseUnit);
             } else {
-                anchorPrice = fetchAnchorPrice(symbol, config, ethPrice);
+                anchorPrice = fetchAnchorPrice(config, ethPrice);
             }
 
             prices[symbolHash] = anchorPrice;
@@ -245,7 +255,7 @@ contract UniswapOracleTWAP is UniswapConfig, PosterAccessControl {
     }
 
     /**
-     * @dev Fetches the current token/eth price accumulator from uniswap.
+     * @dev Fetches the current token/quoteCurrency price accumulator from uniswap.
      */
     function currentCumulativePrice(TokenConfig memory config) internal view returns (uint) {
         (uint cumulativePrice0, uint cumulativePrice1,) = UniswapV2OracleLibrary.currentCumulativePrices(config.uniswapMarket);
@@ -257,18 +267,17 @@ contract UniswapOracleTWAP is UniswapConfig, PosterAccessControl {
     }
 
     /**
-     * @dev Fetches the current eth/usd price from uniswap, with 6 decimals of precision.
-     *  Conversion factor is 1e18 for eth/usdc market, since we decode uniswap price statically with 18 decimals.
+     * @dev Fetches the current eth/usd price from uniswap, with basePricePrecision as precision.
+     *  Conversion factor is 1e18 for eth/usd market, since we decode uniswap price statically with 18 decimals.
      */
     function fetchEthPrice() internal returns (uint) {
-        return fetchAnchorPrice(ETH, getTokenConfigBySymbolHash(ethHash), ethBaseUnit);
+        return fetchAnchorPrice(getTokenConfigBySymbolHash(ethHash), ethBaseUnit);
     }
 
     /**
-     * @dev Fetches the current token/usd price from uniswap, with 6 decimals of precision.
-     * @param conversionFactor 1e18 if seeking the ETH price, and a 6 decimal ETH-USDC price in the case of other assets
+     * @dev Fetches the current token/usd price from uniswap, with basePricePrecision as precision.
      */
-    function fetchAnchorPrice(string memory symbol, TokenConfig memory config, uint conversionFactor) internal virtual returns (uint) {
+    function fetchAnchorPrice(TokenConfig memory config, uint conversionFactor) internal virtual returns (uint) {
         (uint nowCumulativePrice, uint oldCumulativePrice, uint oldTimestamp) = pokeWindowValues(config);
 
         // This should be impossible, but better safe than sorry
@@ -294,9 +303,6 @@ contract UniswapOracleTWAP is UniswapConfig, PosterAccessControl {
         //             = priceAverage * conversionFactor * tokenBaseUnit / ethBaseUnit
         //             = unscaledPriceMantissa / expScale * tokenBaseUnit / ethBaseUnit
         anchorPrice = mul(unscaledPriceMantissa, config.baseUnit) / ethBaseUnit / expScale;
-
-        emit AnchorPriceUpdated(symbol, anchorPrice, oldTimestamp, block.timestamp);
-
         return anchorPrice;
     }
 

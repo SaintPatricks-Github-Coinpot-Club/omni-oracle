@@ -2,6 +2,7 @@
 const hre = require("hardhat");
 const jsonfile = require('jsonfile')
 const { numToWei } = require("../utils/ethUnitParser");
+const { toBn } = require("../utils/bn");
 const configs = require(`./configs/${hre.network.name}`);
 const deploymentFilePath = `./deployments/${hre.network.name}.json`;
 
@@ -53,6 +54,7 @@ const createConfig = async (config, configIndex) => {
     fixedPrice: '0',
     uniswapMarket: hre.ethers.constants.AddressZero,
     isUniswapReversed: false,
+    isPairWithStablecoin: false,
     symbol: '',
     externalOracle: hre.ethers.constants.AddressZero,
   };
@@ -85,23 +87,27 @@ const createConfig = async (config, configIndex) => {
 
     // UNISWAP
     case '1': {
+      const RouterI = new hre.ethers.Contract(configs.UniswapV2Router, RouterAbi, hre.ethers.provider.getSigner());
+      const weth = await RouterI.WETH();
+
       if (config.uniswapMarket) {
         tokenConfig.uniswapMarket = config.uniswapMarket;
       } else {
-        const RouterI = new hre.ethers.Contract(configs.UniswapV2Router, RouterAbi, hre.ethers.provider.getSigner());
-        const weth = await RouterI.WETH();
         const factory = await RouterI.factory();
         const FactoryI = new hre.ethers.Contract(factory, FactoryAbi, hre.ethers.provider.getSigner());
         const pair = await FactoryI.getPair(weth, config.underlying);
         if (pair === hre.ethers.constants.AddressZero) throw Error(`pair not found for ${tokenConfig.underlying} - ${tokenConfig.symbol}`);
         tokenConfig.uniswapMarket = pair;
+      }
+      const PairI = new hre.ethers.Contract(tokenConfig.uniswapMarket, PairAbi, hre.ethers.provider.getSigner());
+      const token0 = await PairI.token0();
+      const token1 = await PairI.token1();
 
-        const PairI = new hre.ethers.Contract(pair, PairAbi, hre.ethers.provider.getSigner());
-        const token0 = await PairI.token0();
-        // isUniswapReversed is true when token0 === WETH
-        tokenConfig.isUniswapReversed = token0.toLowerCase() === weth.toLowerCase();
-        // reverse the flag for base config
-        if (configIndex === 0) tokenConfig.isUniswapReversed = !tokenConfig.isUniswapReversed;
+      // isUniswapReversed is true when token1 === underlying
+      tokenConfig.isUniswapReversed = token1.toLowerCase() === tokenConfig.underlying.toLowerCase();
+
+      if (weth.toLowerCase() !== token0.toLowerCase() && weth.toLowerCase() !== token1.toLowerCase()) {
+        tokenConfig.isPairWithStablecoin = true;
       }
       break;
     }
@@ -156,8 +162,9 @@ const setConfigsOnOracle = async (_detailedConfigs) => {
     console.log('No configs found to be added');
     return;
   }
+  const estimatedGas = await OracleI.estimateGas._setConfigs(toBeAddedConfigs);
   const tx = await OracleI._setConfigs(toBeAddedConfigs, {
-    gasLimit: 2000000,
+    gasLimit: toBn(estimatedGas.toString()).times(1.25).toFixed(0),
   });
   console.log(`Configs set in txn: ${tx.hash}`)
   await tx.wait();

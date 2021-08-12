@@ -29,8 +29,9 @@ async function main() {
       fixedPrice: toBnFixed(config.fixedPrice),
       uniswapMarket: config.uniswapMarket,
       isUniswapReversed: config.isUniswapReversed,
-      symbol: config.symbol,
+      isPairWithStablecoin: config.isPairWithStablecoin,
       externalOracle: config.externalOracle,
+      symbol: config.symbol,
     }
     allConfigs.push(configDetails);
   }
