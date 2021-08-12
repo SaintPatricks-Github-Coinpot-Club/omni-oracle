@@ -57,6 +57,28 @@ module.exports = {
       underlying: "0xF21768cCBC73Ea5B6fd3C687208a7c2def2d966e",
       priceSource: "1",
     },
+    {
+      underlying: "0x2eD076fC51685E7EB12804F8c10210cd305792E3",
+      priceSource: "2",
+    },
+    {
+      underlying: "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56",
+      priceSource: "0",
+      fixedPrice: "1",
+    },
+    {
+      underlying: "0x55d398326f99059fF775485246999027B3197955",
+      priceSource: "1",
+    },
+    {
+      underlying: "0x031b41e504677879370e9DBcF937283A8691Fa7f",
+      priceSource: "2",
+    },
+    {
+      underlying: "0x5921DEE8556c4593EeFCFad3CA5e2f618606483b",
+      priceSource: "1",
+      uniswapMarket: "0x02B0B1229A918815E872c1E4D4c27d1DF8290C90",
+    },
   ],
 
   cTokenConfigs: {
@@ -69,6 +91,11 @@ module.exports = {
       "0xcfD8722118a777955CCDa634122429FEA02c1c88",
       "0xbBCE9ec0db08914B81318a18c3DDf9BeCe25c24D",
       "0x55b90b56417F9d0cd8898a74A41B4B4Ef8CE36dD",
+      "0x1e297761A2d3B459A846860d2c5044BCb34ad73D",
+      "0xF553d7245ac2fC65Aa72027ba84542eC557F2A6C",
+      "0x330b440623525E5AF939Ff20Be87BCeF4e907825",
+      "0x87bb95F247c8AA4B981EF4A6F342cca02dAE8c81",
+      "0x1afaFc3B9bde808070aBEF906E5562B1b1f8a89e",
     ],
   }
 };
