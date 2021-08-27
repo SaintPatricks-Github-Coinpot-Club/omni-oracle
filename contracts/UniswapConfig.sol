@@ -17,7 +17,8 @@ contract UniswapConfig is Administrable {
         FIXED_USD,          /// implies the fixedPrice is a constant multiple of the USD price (which is 1)
         UNISWAP,            /// implies the price is fetched from uniswap
         POSTER,             /// implies the price is posted externally
-        EXTERNAL_ORACLE     /// implies the price is read externally
+        EXTERNAL_ORACLE,    /// implies the price is read externally
+        BEEFY_VAULT         /// implies the price is fetched from beefy.finance vaults
     }
 
     /// @dev Describe how the USD price should be determined for an asset.

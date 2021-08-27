@@ -125,6 +125,12 @@ const createConfig = async (config, configIndex) => {
       break;
     }
 
+    // BEEFY_VAULT
+    case '4': {
+      // nothing needs to be done here for now
+      break;
+    }
+
     default: {
       throw Error(`invalid priceSource for ${tokenConfig.underlying} - ${tokenConfig.symbol}`)
     }

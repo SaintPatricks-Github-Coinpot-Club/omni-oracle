@@ -9,6 +9,7 @@ import "./PosterAccessControl.sol";
 import "./UniswapHelper.sol";
 import "./IExternalOracle.sol";
 import "./IERC20Extended.sol";
+import "./IBeefyInterfaces.sol";
 
 struct Observation {
     uint timestamp;
@@ -95,6 +96,17 @@ contract UniswapOracleTWAP is UniswapConfig, PosterAccessControl {
         if (config.priceSource == PriceSource.EXTERNAL_ORACLE) {
             require(config.externalOracle != address(0), "must have external oracle");
         }
+        if (config.priceSource == PriceSource.BEEFY_VAULT) {
+            // Note: These 18 decimals precision conditions may make this contract BSC specific
+            require(IERC20(config.underlying).decimals() == 18, "underlying precision mismatch");
+            IERC20 underlyingAsset = IBeefyVault(config.underlying).want();
+            require(underlyingAsset.decimals() == 18, "want precision mismatch");
+            require(
+                getTokenConfigByUnderlying(address(underlyingAsset))
+                    .priceSource != PriceSource.BEEFY_VAULT,
+                "underlying asset priceSource can't be BEEFY_VAULT"
+            );
+        }
     }
 
     function _setConfigs(TokenConfig[] memory configs) external {
@@ -149,7 +161,7 @@ contract UniswapOracleTWAP is UniswapConfig, PosterAccessControl {
      * @param underlying The address to fetch the price of
      * @return Price denominated in USD
      */
-    function price(address underlying) external view returns (uint) {
+    function price(address underlying) public view returns (uint) {
         TokenConfig memory config = getTokenConfigByUnderlying(underlying);
         return priceInternal(config);
     }
@@ -162,6 +174,11 @@ contract UniswapOracleTWAP is UniswapConfig, PosterAccessControl {
             uint8 oracleDecimals = IExternalOracle(config.externalOracle).decimals();
             (, int256 answer, , , ) = IExternalOracle(config.externalOracle).latestRoundData();
             return mul(uint256(answer), basePricePrecision) / (10 ** uint256(oracleDecimals));
+        }
+        if (config.priceSource == PriceSource.BEEFY_VAULT) {
+            uint priceInWantTokens = IBeefyVault(config.underlying).getPricePerFullShare();
+            uint wantTokenUsdPrice = price(address(IBeefyVault(config.underlying).want()));
+            return mul(priceInWantTokens, wantTokenUsdPrice) / expScale;
         }
     }
 
@@ -251,6 +268,11 @@ contract UniswapOracleTWAP is UniswapConfig, PosterAccessControl {
 
             prices[symbolHash] = anchorPrice;
             emit PriceUpdated(symbol, anchorPrice);
+        }
+        if (config.priceSource == PriceSource.BEEFY_VAULT) {
+            // update price for underlying 'want' asset
+            address underlyingAsset = address(IBeefyVault(config.underlying).want());
+            updateUnderlyingPrice(underlyingAsset);
         }
     }
 
