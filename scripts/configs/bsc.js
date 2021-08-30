@@ -13,6 +13,7 @@
  * 1 - UNISWAP            -> implies the price is fetched from uniswap
  * 2 - POSTER             -> implies the price is posted externally
  * 3 - EXTERNAL_ORACLE    -> implies the price is read externally
+ * 4 - BEEFY_VAULT        -> implies the price is fetched from beefy.finance vaults
  * 
  */
 
@@ -78,6 +79,10 @@ module.exports = {
       underlying: "0x5921DEE8556c4593EeFCFad3CA5e2f618606483b",
       priceSource: "1",
       uniswapMarket: "0x02B0B1229A918815E872c1E4D4c27d1DF8290C90",
+    },
+    {
+      underlying: "0x97e5d50Fe0632A95b9cf1853E744E02f7D816677",
+      priceSource: "4",
     },
   ],
 
