@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 
-pragma solidity ^0.6.10;
+pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 
 import "./UniswapConfig.sol";
@@ -115,7 +115,7 @@ contract UniswapOracleTWAP is UniswapConfig, PosterAccessControl {
         }
     }
 
-    function _setPrice(address underlying, string memory symbol, uint priceMantissa) public {
+    function _setPrice(address underlying, string memory symbol, uint priceMantissa) external {
         require(msg.sender == poster, "Unauthorized");
 
         TokenConfig memory config = getTokenConfigByUnderlying(underlying);
@@ -139,7 +139,7 @@ contract UniswapOracleTWAP is UniswapConfig, PosterAccessControl {
         emit CTokenUnderlyingUpdated(cToken, config.underlying);
     }
 
-    function _setUnderlyingForCTokens(address[] memory _cTokens, address[] memory _underlyings) public {
+    function _setUnderlyingForCTokens(address[] memory _cTokens, address[] memory _underlyings) external {
         require(_cTokens.length == _underlyings.length, "length mismatch");
         for (uint i = 0; i < _cTokens.length; i++) {
             _setUnderlyingForCToken(_cTokens[i], _underlyings[i]);
@@ -237,7 +237,7 @@ contract UniswapOracleTWAP is UniswapConfig, PosterAccessControl {
     /**
      * @notice Open function to update all prices
      */
-    function updateAllPrices() public {
+    function updateAllPrices() external {
         for (uint i = 0; i < numTokens; i++) {
             updateUnderlyingPrice(getTokenConfig(i).underlying);
         }
@@ -351,7 +351,7 @@ contract UniswapOracleTWAP is UniswapConfig, PosterAccessControl {
         return (cumulativePrice, oldObservations[symbolHash].acc, oldObservations[symbolHash].timestamp);
     }
 
-    function getSymbolHash(string memory symbol) public pure returns (bytes32) {
+    function getSymbolHash(string memory symbol) external pure returns (bytes32) {
         return keccak256(abi.encodePacked(symbol));
     }
 
