@@ -97,15 +97,23 @@ contract UniswapOracleTWAP is UniswapConfig, PosterAccessControl {
             require(config.externalOracle != address(0), "must have external oracle");
         }
         if (config.priceSource == PriceSource.BEEFY_VAULT) {
+            require(config.beefyVaultBaseAsset != address(0), "must have beefyVaultBaseAsset");
+
             // Note: These 18 decimals precision conditions may make this contract BSC specific
             require(IERC20(config.underlying).decimals() == 18, "underlying precision mismatch");
-            IERC20 underlyingAsset = IBeefyVault(config.underlying).want();
-            require(underlyingAsset.decimals() == 18, "want precision mismatch");
+            require(IERC20(config.beefyVaultBaseAsset).decimals() == 18, "beefyVaultBaseAsset precision mismatch");
             require(
-                getTokenConfigByUnderlying(address(underlyingAsset))
+                getTokenConfigByUnderlying(config.beefyVaultBaseAsset)
                     .priceSource != PriceSource.BEEFY_VAULT,
-                "underlying asset priceSource can't be BEEFY_VAULT"
+                "beefyVaultBaseAsset priceSource can't be BEEFY_VAULT"
             );
+            if (config.beefyVType == BeefyVaultType.SINGLE_ASSET) {
+                require(config.beefyVaultBaseAsset == address(IBeefyVault(config.underlying).want()), "invalid beefyVaultBaseAsset");
+            }
+            if (config.beefyVType == BeefyVaultType.PCS_PAIR) {
+                IUniswapV2Pair lpPair = IUniswapV2Pair(address(IBeefyVault(config.underlying).want()));
+                require(lpPair.token0() == config.beefyVaultBaseAsset || lpPair.token1() == config.beefyVaultBaseAsset, "invalid beefyVaultBaseAsset");
+            }
         }
     }
 
@@ -176,9 +184,23 @@ contract UniswapOracleTWAP is UniswapConfig, PosterAccessControl {
             return mul(uint256(answer), basePricePrecision) / (10 ** uint256(oracleDecimals));
         }
         if (config.priceSource == PriceSource.BEEFY_VAULT) {
-            uint priceInWantTokens = IBeefyVault(config.underlying).getPricePerFullShare();
-            uint wantTokenUsdPrice = price(address(IBeefyVault(config.underlying).want()));
-            return mul(priceInWantTokens, wantTokenUsdPrice) / expScale;
+            if (config.beefyVType == BeefyVaultType.SINGLE_ASSET) {
+                // we assume config.beefyVaultBaseAsset == want()
+                uint priceInWantTokens = IBeefyVault(config.underlying).getPricePerFullShare();
+                uint wantTokenUsdPrice = price(config.beefyVaultBaseAsset);
+                return mul(priceInWantTokens, wantTokenUsdPrice) / expScale;
+            }
+            if (config.beefyVType == BeefyVaultType.PCS_PAIR) {
+                uint priceInLpTokens = IBeefyVault(config.underlying).getPricePerFullShare();
+                IERC20 lpPair = IBeefyVault(config.underlying).want();
+                uint lpBaseAssetBal = IERC20(config.beefyVaultBaseAsset).balanceOf(address(lpPair));
+                uint totalSupplyLp = lpPair.totalSupply();
+                uint baseAssetUsdPrice = price(config.beefyVaultBaseAsset);
+
+                uint numerator = mul(priceInLpTokens, mul(2, mul(lpBaseAssetBal, baseAssetUsdPrice)));
+                uint denominator = mul(totalSupplyLp, expScale);
+                return numerator / denominator;
+            }
         }
     }
 
@@ -271,8 +293,7 @@ contract UniswapOracleTWAP is UniswapConfig, PosterAccessControl {
         }
         if (config.priceSource == PriceSource.BEEFY_VAULT) {
             // update price for underlying 'want' asset
-            address underlyingAsset = address(IBeefyVault(config.underlying).want());
-            updateUnderlyingPrice(underlyingAsset);
+            updateUnderlyingPrice(config.beefyVaultBaseAsset);
         }
     }
 

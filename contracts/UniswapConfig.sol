@@ -21,6 +21,12 @@ contract UniswapConfig is Administrable {
         BEEFY_VAULT         /// implies the price is fetched from beefy.finance vaults
     }
 
+    /// @dev Describe the type of BEEFY_VAULT.
+    enum BeefyVaultType {
+        SINGLE_ASSET,       /// implies the vault manages simple assets (like CAKE)
+        PCS_PAIR            /// implies the vault manages pancakeswap LP pair
+    }
+
     /// @dev Describe how the USD price should be determined for an asset.
     ///  There should be 1 TokenConfig object for each supported asset.
     struct TokenConfig {
@@ -33,6 +39,8 @@ contract UniswapConfig is Administrable {
         bool isUniswapReversed;
         bool isPairWithStablecoin;
         address externalOracle;
+        BeefyVaultType beefyVType;
+        address beefyVaultBaseAsset;
         string symbol;
     }
 

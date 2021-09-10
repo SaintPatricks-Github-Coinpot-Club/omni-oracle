@@ -55,8 +55,10 @@ const createConfig = async (config, configIndex) => {
     uniswapMarket: hre.ethers.constants.AddressZero,
     isUniswapReversed: false,
     isPairWithStablecoin: false,
-    symbol: '',
     externalOracle: hre.ethers.constants.AddressZero,
+    beefyVType: '0',
+    beefyVaultBaseAsset: hre.ethers.constants.AddressZero,
+    symbol: '',
   };
 
   tokenConfig.underlying = config.underlying;
@@ -127,7 +129,10 @@ const createConfig = async (config, configIndex) => {
 
     // BEEFY_VAULT
     case '4': {
-      // nothing needs to be done here for now
+      if (!config.beefyVType) throw Error(`beefyVType not provided for ${tokenConfig.underlying} - ${tokenConfig.symbol}`);
+      if (!config.beefyVaultBaseAsset) throw Error(`beefyVaultBaseAsset not provided for ${tokenConfig.underlying} - ${tokenConfig.symbol}`);
+      tokenConfig.beefyVType = config.beefyVType;
+      tokenConfig.beefyVaultBaseAsset = config.beefyVaultBaseAsset;
       break;
     }
 
@@ -135,7 +140,6 @@ const createConfig = async (config, configIndex) => {
       throw Error(`invalid priceSource for ${tokenConfig.underlying} - ${tokenConfig.symbol}`)
     }
   }
-
   return tokenConfig;
 }
 

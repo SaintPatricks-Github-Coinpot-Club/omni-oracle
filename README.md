@@ -26,7 +26,7 @@ Then you can run the [deployment scripts](scripts) in the order
 
 Scripts can be run using the command
 
-    npm run hh --network {network-name} {script-path}
+    npm run hh -- --network {network-name} {script-path}
 
 Currently deployed contracts can be found in [deployments](deployments/) directory.
 
