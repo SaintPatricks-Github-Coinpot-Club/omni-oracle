@@ -45,6 +45,7 @@ module.exports = {
     {
       underlying: "0x3C70260eEe0a2bFc4b375feB810325801f289fBd",
       priceSource: "1",
+      uniswapMarket: "0x7cE7b510761EAe414A3044D2Dc3dcA339AaEed06",
     },
     {
       underlying: "0xaBaE871B7E3b67aEeC6B46AE9FE1A91660AadAC5",
@@ -80,9 +81,26 @@ module.exports = {
       priceSource: "1",
       uniswapMarket: "0x02B0B1229A918815E872c1E4D4c27d1DF8290C90",
     },
+    // Puff Cake vault
     {
-      underlying: "0x97e5d50Fe0632A95b9cf1853E744E02f7D816677",
+      underlying: "0x9E96449359aff32d0E699a1335585118A7Acf995",
       priceSource: "4",
+      beefyVType: "0",
+      beefyVaultBaseAsset: "0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82"
+    },
+    // Puff pOpen Wbnb PcsLP vault
+    {
+      underlying: "0x58f902582F69eBFB0cf7f6dc4b05b1C37a217959",
+      priceSource: "4",
+      beefyVType: "1",
+      beefyVaultBaseAsset: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c"
+    },
+    // Puff Cake Wbnb PcsLP vault
+    {
+      underlying: "0xA4A34B6Ad23562A585a00a7b75076Cd71014f57b",
+      priceSource: "4",
+      beefyVType: "1",
+      beefyVaultBaseAsset: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c"
     },
   ],
 
