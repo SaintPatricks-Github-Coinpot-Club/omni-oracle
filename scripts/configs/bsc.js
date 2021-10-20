@@ -114,7 +114,10 @@ module.exports = {
       "0x330b440623525E5AF939Ff20Be87BCeF4e907825",
       "0x87bb95F247c8AA4B981EF4A6F342cca02dAE8c81",
       "0x1afaFc3B9bde808070aBEF906E5562B1b1f8a89e",
-      "0x1aF197D1bC1cDE0E9Ee0C9ea090A4c6c36fE58Df",
+      "0x92730F2500d65A9E8A9eF3383BAfbB7E381F3BE5",   // kUSDO (puffCake Omnicomp)
+      "0x1aF197D1bC1cDE0E9Ee0C9ea090A4c6c36fE58Df",   // kpuffCake (puffCake Omnicomp)
+      "0x2Aa865240f283803737376b70a4CF5cef9f06Acb",   // kUSDO (puffLina Omnicomp)
+      "0x3E77D0f9A5a885d2A70FeD404e39A4E41776EE1e",   // kpuffLina (puffLina Omnicomp)
     ],
   }
 };
