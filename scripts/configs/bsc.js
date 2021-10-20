@@ -45,6 +45,7 @@ module.exports = {
     {
       underlying: "0x3C70260eEe0a2bFc4b375feB810325801f289fBd",
       priceSource: "1",
+      uniswapMarket: "0x7cE7b510761EAe414A3044D2Dc3dcA339AaEed06",
     },
     {
       underlying: "0xaBaE871B7E3b67aEeC6B46AE9FE1A91660AadAC5",
@@ -80,8 +81,20 @@ module.exports = {
       priceSource: "1",
       uniswapMarket: "0x02B0B1229A918815E872c1E4D4c27d1DF8290C90",
     },
+    // Puff Cake vault
     {
-      underlying: "0x97e5d50Fe0632A95b9cf1853E744E02f7D816677",
+      underlying: "0x9E96449359aff32d0E699a1335585118A7Acf995",
+      priceSource: "4",
+    },
+    // Lina - Lina/Busd 
+    {
+      underlying: "0x762539b45A1dCcE3D36d080F74d1AED37844b878",
+      priceSource: "1",
+      uniswapMarket: "0xC5768c5371568Cf1114cddD52CAeD163A42626Ed",
+    },
+    // Puff Lina vault
+    {
+      underlying: "0x5a2b19836324e3495a3977aE7b9B1ff0D968d96b",
       priceSource: "4",
     },
   ],
@@ -101,6 +114,7 @@ module.exports = {
       "0x330b440623525E5AF939Ff20Be87BCeF4e907825",
       "0x87bb95F247c8AA4B981EF4A6F342cca02dAE8c81",
       "0x1afaFc3B9bde808070aBEF906E5562B1b1f8a89e",
+      "0x1aF197D1bC1cDE0E9Ee0C9ea090A4c6c36fE58Df",
     ],
   }
 };
