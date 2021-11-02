@@ -18,7 +18,7 @@ contract UniswapConfig is Administrable {
         UNISWAP,            /// implies the price is fetched from uniswap
         POSTER,             /// implies the price is posted externally
         EXTERNAL_ORACLE,    /// implies the price is read externally
-        BEEFY_VAULT         /// implies the price is fetched from beefy.finance vaults
+        REPOINT             /// implies the price is repointed to other asset's price
     }
 
     /// @dev Describe how the USD price should be determined for an asset.
@@ -33,6 +33,7 @@ contract UniswapConfig is Administrable {
         bool isUniswapReversed;
         bool isPairWithStablecoin;
         address externalOracle;
+        address repointedAsset;
         string symbol;
     }
 

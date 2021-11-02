@@ -31,6 +31,7 @@ async function main() {
       isUniswapReversed: config.isUniswapReversed,
       isPairWithStablecoin: config.isPairWithStablecoin,
       externalOracle: config.externalOracle,
+      repointedAsset: config.repointedAsset,
       symbol: config.symbol,
     }
     allConfigs.push(configDetails);

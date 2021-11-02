@@ -57,6 +57,7 @@ const createConfig = async (config, configIndex) => {
     isPairWithStablecoin: false,
     symbol: '',
     externalOracle: hre.ethers.constants.AddressZero,
+    repointedAsset: hre.ethers.constants.AddressZero,
   };
 
   tokenConfig.underlying = config.underlying;
@@ -125,9 +126,10 @@ const createConfig = async (config, configIndex) => {
       break;
     }
 
-    // BEEFY_VAULT
+    // REPOINT
     case '4': {
-      // nothing needs to be done here for now
+      if (!config.repointedAsset) throw Error(`repointedAsset not provided for ${tokenConfig.underlying} - ${tokenConfig.symbol}`);
+      tokenConfig.repointedAsset = config.repointedAsset;
       break;
     }
 

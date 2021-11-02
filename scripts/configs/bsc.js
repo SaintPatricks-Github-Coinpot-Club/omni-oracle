@@ -13,7 +13,7 @@
  * 1 - UNISWAP            -> implies the price is fetched from uniswap
  * 2 - POSTER             -> implies the price is posted externally
  * 3 - EXTERNAL_ORACLE    -> implies the price is read externally
- * 4 - BEEFY_VAULT        -> implies the price is fetched from beefy.finance vaults
+ * 4 - REPOINT            -> implies the price is repointed to other asset's price
  * 
  */
 
@@ -85,6 +85,7 @@ module.exports = {
     {
       underlying: "0x9E96449359aff32d0E699a1335585118A7Acf995",
       priceSource: "4",
+      repointedAsset: "0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82",
     },
     // Lina - Lina/Busd 
     {
@@ -96,6 +97,7 @@ module.exports = {
     {
       underlying: "0x5a2b19836324e3495a3977aE7b9B1ff0D968d96b",
       priceSource: "4",
+      repointedAsset: "0x762539b45A1dCcE3D36d080F74d1AED37844b878",
     },
   ],
 
