@@ -36,7 +36,7 @@ async function main() {
     }
     allConfigs.push(configDetails);
   }
-  console.log("Deployed configs ==========================>");
+  console.log("Deployed configs ==========================> for oracle::: ",oracle);
   console.log(allConfigs);
 
   const oraclePrices = [];

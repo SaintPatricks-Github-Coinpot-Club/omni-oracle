@@ -172,7 +172,7 @@ const setConfigsOnOracle = async (_detailedConfigs) => {
   }
   const estimatedGas = await OracleI.estimateGas._setConfigs(toBeAddedConfigs);
   const tx = await OracleI._setConfigs(toBeAddedConfigs, {
-    gasLimit: toBn(estimatedGas.toString()).times(1.25).toFixed(0),
+    gasLimit: toBn('1000000').toFixed(0),
   });
   console.log(`Configs set in txn: ${tx.hash}`)
   await tx.wait();

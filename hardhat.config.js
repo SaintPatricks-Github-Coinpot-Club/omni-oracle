@@ -3,6 +3,7 @@ require('dotenv').config();
 require("@nomiclabs/hardhat-ethers");
 
 const privateKey = process.env.privateKey;
+const PrivateKey_test = process.env.PrivateKey_test;
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
