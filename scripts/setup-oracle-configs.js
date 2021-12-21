@@ -3,6 +3,7 @@ const hre = require("hardhat");
 const jsonfile = require('jsonfile')
 const { numToWei } = require("../utils/ethUnitParser");
 const { toBn } = require("../utils/bn");
+const { UniLpCalcParams } = require("../utils/constants");
 const configs = require(`./configs/${hre.network.name}`);
 const deploymentFilePath = `./deployments/${hre.network.name}.json`;
 
@@ -55,9 +56,10 @@ const createConfig = async (config, configIndex) => {
     uniswapMarket: hre.ethers.constants.AddressZero,
     isUniswapReversed: false,
     isPairWithStablecoin: false,
-    symbol: '',
     externalOracle: hre.ethers.constants.AddressZero,
     repointedAsset: hre.ethers.constants.AddressZero,
+    symbol: '',
+    uniLpCalcParams: UniLpCalcParams.Default,
   };
 
   tokenConfig.underlying = config.underlying;
@@ -66,12 +68,27 @@ const createConfig = async (config, configIndex) => {
   const erc20Decimals = await Erc20I.decimals();
   tokenConfig.baseUnit = numToWei("1", erc20Decimals);
 
-  const erc20Symbol = await Erc20I.symbol();
-  if (!config.symbol) {
-    tokenConfig.symbol = erc20Symbol;
-  } else {
-    if (config.symbol !== erc20Symbol) console.log(`Symbol mismatch: ${config.symbol} provided for ${erc20Symbol}`);
+  // Determine config's symbol
+  if (config.symbol) {
     tokenConfig.symbol = config.symbol;
+  } else {
+    if (config.priceSource === "5") {
+      const PairI = new hre.ethers.Contract(tokenConfig.underlying, PairAbi, hre.ethers.provider.getSigner());
+      const [token0, token1] = await Promise.all([
+        await PairI.token0(),
+        await PairI.token1()
+      ]);
+      const Token0I = new hre.ethers.Contract(token0, Erc20Abi, hre.ethers.provider.getSigner());
+      const Token1I = new hre.ethers.Contract(token1, Erc20Abi, hre.ethers.provider.getSigner());
+      const [pairSym, token0Sym, token1Sym] = await Promise.all([
+        await Erc20I.symbol(),
+        await Token0I.symbol(),
+        await Token1I.symbol()
+      ]);
+      tokenConfig.symbol = `${pairSym}--${token0Sym}--${token1Sym}`;
+    } else {
+      tokenConfig.symbol = await Erc20I.symbol();
+    }
   }
   tokenConfig.symbolHash = hre.ethers.utils.keccak256(hre.ethers.utils.toUtf8Bytes(tokenConfig.symbol));
 
@@ -130,6 +147,13 @@ const createConfig = async (config, configIndex) => {
     case '4': {
       if (!config.repointedAsset) throw Error(`repointedAsset not provided for ${tokenConfig.underlying} - ${tokenConfig.symbol}`);
       tokenConfig.repointedAsset = config.repointedAsset;
+      break;
+    }
+
+    // UNI_V2_LP
+    case '5': {
+      if (!config.uniLpCalcParams) throw Error(`uniLpCalcParams not provided for ${tokenConfig.underlying} - ${tokenConfig.symbol}`);
+      tokenConfig.uniLpCalcParams = config.uniLpCalcParams;
       break;
     }
 

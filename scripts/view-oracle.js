@@ -33,6 +33,10 @@ async function main() {
       externalOracle: config.externalOracle,
       repointedAsset: config.repointedAsset,
       symbol: config.symbol,
+      uniLpCalcParams: {
+        numFactor: toBnFixed(config.uniLpCalcParams.numFactor),
+        denoFactor: toBnFixed(config.uniLpCalcParams.denoFactor),
+      },
     }
     allConfigs.push(configDetails);
   }

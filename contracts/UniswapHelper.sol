@@ -67,4 +67,11 @@ interface IUniswapV2Pair {
     function price1CumulativeLast() external view returns (uint);
     function token0() external view returns (address);
     function token1() external view returns (address);
+    function totalSupply() external view returns (uint256);
+    function kLast() external view returns (uint256);
+    function factory() external view returns (address);
+}
+
+interface IUniswapV2Factory {
+  function feeTo() external view returns (address);
 }

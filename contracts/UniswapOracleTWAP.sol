@@ -4,6 +4,7 @@ pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 
 import "./UniswapConfig.sol";
+import "./UniswapLpPrice.sol";
 import "./PosterAccessControl.sol";
 
 import "./UniswapHelper.sol";
@@ -15,7 +16,7 @@ struct Observation {
     uint acc;
 }
 
-contract UniswapOracleTWAP is UniswapConfig, PosterAccessControl {
+contract UniswapOracleTWAP is UniswapLpPrice, UniswapConfig, PosterAccessControl {
     using FixedPoint for *;
 
     /// @notice The number of wei in 1 ETH
@@ -102,6 +103,14 @@ contract UniswapOracleTWAP is UniswapConfig, PosterAccessControl {
                 "repointed asset priceSource can't be REPOINT"
             );
         }
+        if (config.priceSource == PriceSource.UNI_V2_LP) {
+            require(config.uniLpCalcParams.numFactor != 0, "must have UniLpCalcParams.numFactor");
+            require(config.uniLpCalcParams.denoFactor != 0, "must have UniLpCalcParams.denoFactor");
+            IUniswapV2Pair pair = IUniswapV2Pair(config.underlying);
+            // must have token configs for token0 and token1
+            getTokenConfigByUnderlying(pair.token0());
+            getTokenConfigByUnderlying(pair.token1());
+        }
     }
 
     function _setConfigs(TokenConfig[] memory configs) external {
@@ -156,7 +165,7 @@ contract UniswapOracleTWAP is UniswapConfig, PosterAccessControl {
      * @param underlying The address to fetch the price of
      * @return Price denominated in USD
      */
-    function price(address underlying) public view returns (uint) {
+    function price(address underlying) public view override returns (uint) {
         TokenConfig memory config = getTokenConfigByUnderlying(underlying);
         return priceInternal(config);
     }
@@ -171,6 +180,8 @@ contract UniswapOracleTWAP is UniswapConfig, PosterAccessControl {
             return mul(uint256(answer), basePricePrecision) / (10 ** uint256(oracleDecimals));
         }
         if (config.priceSource == PriceSource.REPOINT) return price(config.repointedAsset);
+        if (config.priceSource == PriceSource.UNI_V2_LP)
+            return getPairTokenPriceUsd(config.underlying, config.uniLpCalcParams);
     }
 
     /**
@@ -263,6 +274,12 @@ contract UniswapOracleTWAP is UniswapConfig, PosterAccessControl {
         if (config.priceSource == PriceSource.REPOINT) {
             // update price for repointed asset
             updateUnderlyingPrice(config.repointedAsset);
+        }
+        if (config.priceSource == PriceSource.UNI_V2_LP) {
+            // update price of LP constituent assets
+            IUniswapV2Pair pair = IUniswapV2Pair(config.underlying);
+            updateUnderlyingPrice(pair.token0());
+            updateUnderlyingPrice(pair.token1());
         }
     }
 

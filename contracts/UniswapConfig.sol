@@ -18,7 +18,8 @@ contract UniswapConfig is Administrable {
         UNISWAP,            /// implies the price is fetched from uniswap
         POSTER,             /// implies the price is posted externally
         EXTERNAL_ORACLE,    /// implies the price is read externally
-        REPOINT             /// implies the price is repointed to other asset's price
+        REPOINT,            /// implies the price is repointed to other asset's price
+        UNI_V2_LP           /// implies the price is computed as UniV2 LP pair
     }
 
     /// @dev Describe how the USD price should be determined for an asset.
@@ -35,6 +36,13 @@ contract UniswapConfig is Administrable {
         address externalOracle;
         address repointedAsset;
         string symbol;
+        UniLpCalcParams uniLpCalcParams;
+    }
+
+    /// @dev Describe the params needed to compute Uni LP pair's total supply
+    struct UniLpCalcParams {
+        uint256 numFactor;
+        uint256 denoFactor;
     }
 
     /// @notice The max number of tokens this contract is hardcoded to support
@@ -49,6 +57,7 @@ contract UniswapConfig is Administrable {
         require(msg.sender == admin, "unauthorized");
         require(numTokens < maxTokens, "too many configs");
         require(getUnderlyingIndex(config.underlying) == uint(-1), "config exists");
+        require(getSymbolHashIndex(config.symbolHash) == uint(-1), "config.symbolHash exists");
         require(config.underlying != address(0), "invalid config");
 
         emit ConfigUpdated(numTokens, tokenConfigs[uint(-1)], config, msg.sender);
