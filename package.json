@@ -21,6 +21,7 @@
   "homepage": "https://github.com/omni-corp-protocols/omni-oracle#readme",
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",
+    "@nomiclabs/hardhat-etherscan": "^2.1.8",
     "ethers": "^5.3.1",
     "hardhat": "^2.3.3",
     "jsonfile": "^6.1.0"

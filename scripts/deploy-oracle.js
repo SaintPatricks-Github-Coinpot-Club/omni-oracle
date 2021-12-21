@@ -13,10 +13,11 @@ async function main() {
   const UniswapOracleTWAP = await hre.ethers.getContractFactory("UniswapOracleTWAP");
   const basePricePrecision = numToWei("1", configs.basePriceDecimals);
   const oracle = await UniswapOracleTWAP.deploy(configs.twapWindow, configs.baseAsset, basePricePrecision);
-  await oracle.deployed();
-
   console.log("UniswapOracleTWAP deployed to:", oracle.address);
   saveAddress('UniswapOracleTWAP', oracle.address);
+
+  await oracle.deployTransaction.wait(10);
+  await verifyContract(oracle.address, [configs.twapWindow, configs.baseAsset, basePricePrecision]);
 }
 
 const saveAddress = (contractName, contractAddress) => {
@@ -28,6 +29,13 @@ const saveAddress = (contractName, contractAddress) => {
   });
   jsonfile.writeFileSync(outputFilePath, newData, { spaces: 2 });
 }
+
+const verifyContract = async (contractAddress, constructorArgs) => {
+  await hre.run("verify:verify", {
+    address: contractAddress,
+    constructorArguments: constructorArgs,
+  });
+};
 
 main()
   .then(() => process.exit(0))

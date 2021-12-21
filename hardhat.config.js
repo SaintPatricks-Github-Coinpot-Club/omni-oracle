@@ -1,6 +1,7 @@
 
 require('dotenv').config();
 require("@nomiclabs/hardhat-ethers");
+require("@nomiclabs/hardhat-etherscan");
 
 const privateKey = process.env.privateKey;
 
@@ -26,6 +27,9 @@ module.exports = {
         runs: 999999
       }
     }
+  },
+  etherscan: {
+    apiKey: process.env.etherscanApiKey,
   },
 };
 
