@@ -1,6 +1,7 @@
 
 const hre = require("hardhat");
 const jsonfile = require('jsonfile')
+const axios = require('axios').default;
 const { numToWei, weiToNum } = require("../utils/ethUnitParser");
 const { toBn, toBnFixed } = require("../utils/bn");
 const deploymentFilePath = `./deployments/${hre.network.name}.json`;
@@ -14,7 +15,7 @@ async function main() {
   const OracleI = await hre.ethers.getContractAt("UniswapOracleTWAP", oracle);
 
   const numConfigs = await OracleI.numTokens();
-  console.log("Total configs:", toBnFixed(numConfigs));
+  console.log("Total configs on Oracle:", toBnFixed(numConfigs));
 
   const allConfigs = [];
 
@@ -33,15 +34,16 @@ async function main() {
       externalOracle: config.externalOracle,
       repointedAsset: config.repointedAsset,
       symbol: config.symbol,
-      uniLpCalcParams: {
-        numFactor: toBnFixed(config.uniLpCalcParams.numFactor),
-        denoFactor: toBnFixed(config.uniLpCalcParams.denoFactor),
-      },
     }
     allConfigs.push(configDetails);
   }
   console.log("Deployed configs ==========================>");
   console.log(allConfigs);
+
+  const cTokensArr = await getMappedCTokensArr(oracle);
+  console.log("\nCTokens whose underlyings are set on oracle ==========================>");
+  console.log(cTokensArr);
+  console.log(`Number of CTokens mapped: ${cTokensArr.length}`);
 
   const oraclePrices = [];
 
@@ -52,14 +54,25 @@ async function main() {
       price: weiToNum(priceRaw, configs.basePriceDecimals),
     });
   }
-  console.log("Prices ==========================>");
-  console.table(oraclePrices)
+  console.log("\nUnderlying Prices on oracle ==========================>");
+  console.table(oraclePrices);
 
-  console.log(`\nFound ${configs.cTokenConfigs.cTokens.length} CToken configs.`);
+  console.log(`\nFound ${configs.cTokenConfigs.cTokens.length} CToken configs in config file.`);
+  const priceData1 = await getCTokenPricesOnOracle(OracleI, configs.cTokenConfigs.cTokens, allConfigs, configs.basePriceDecimals);;
+  console.log("Prices of CTokens from config file ==========================>");
+  console.table(priceData1);
+
+  console.log(`\nFound ${cTokensArr.length} mapped CTokens on oracle.`);
+  const priceData2 = await getCTokenPricesOnOracle(OracleI, cTokensArr, allConfigs, configs.basePriceDecimals);
+  console.log("Prices of mapped CTokens on oracle ==========================>");
+  console.table(priceData2);
+};
+
+const getCTokenPricesOnOracle = async (OracleI, cTokensArr, allConfigs, basePriceDecimals) => {
   const priceData = [];
 
-  for (let i = 0; i < configs.cTokenConfigs.cTokens.length; i++) {
-    const cTokenAddr = configs.cTokenConfigs.cTokens[i];
+  for (let i = 0; i < cTokensArr.length; i++) {
+    const cTokenAddr = cTokensArr[i];
     const oracleUnderlying = await OracleI.underlyings(cTokenAddr);
     const config = allConfigs.find(el => el.underlying === oracleUnderlying);
     const priceRaw = await OracleI["price(address)"](config.underlying);
@@ -69,13 +82,48 @@ async function main() {
 
     priceData.push({
       symbol: config.symbol,
-      price: weiToNum(priceRaw, configs.basePriceDecimals),
+      price: weiToNum(priceRaw, basePriceDecimals),
       'getUnderlyingPrice()': underlyingPrice
     });
   }
-  console.log("CToken Prices ==========================>");
-  console.table(priceData)
-};
+  return priceData;
+}
+
+const getMappedCTokensArr = async (oracleAddr) => {
+  const endpoint = "https://graphql.bitquery.io/"
+  const headers = {
+    "Content-Type": "application/json",
+    "X-API-KEY": process.env.bitqueryKey,
+  }
+  const query = `{
+    ethereum(network: ${hre.network.name}) {
+      smartContractEvents(
+        smartContractAddress: {is: "${oracleAddr}"}
+        smartContractEvent: {is: "CTokenUnderlyingUpdated(address,address)"}
+        options: {asc: "block.height"}
+      ) {
+        arguments {
+          argument
+          value
+        }
+        block {
+          height
+        }
+        eventIndex
+      }
+    }
+  }`;
+
+  const response = await axios.post(endpoint, JSON.stringify({ query }), {
+    headers: headers
+  });
+  const eventData = response.data.data.ethereum.smartContractEvents;
+  const sorted = eventData.sort((a, b) => {
+    if (a.block.height !== b.block.height) return 0
+    else return a.eventIndex - b.eventIndex
+  });
+  return sorted.map(a => a.arguments[0].value)
+}
 
 main()
   .then(() => process.exit(0))
