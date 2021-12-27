@@ -17,6 +17,7 @@ const { UniLpCalcParams } = require("../../utils/constants");
  * 3 - EXTERNAL_ORACLE    -> implies the price is read externally
  * 4 - REPOINT            -> implies the price is repointed to other asset's price
  * 5 - UNI_V2_LP          -> implies the price is computed as UniV2 LP pair
+ * 6 - CURVE_LP           -> implies the price is computed as Curve Finance LP
  * 
  */
 
@@ -167,6 +168,25 @@ module.exports = {
       underlying: "0x16b9a82891338f9bA80E2D6970FddA79D1eb0daE",
       priceSource: "5",
       uniLpCalcParams: UniLpCalcParams.Pancake,
+    },
+    // BTCB
+    {
+      underlying: "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c",
+      priceSource: "1",
+    },
+    // Ellipsis 3EPS LP
+    {
+      underlying: "0xaF4dE8E872131AE328Ce21D909C74705d3Aaf452",
+      priceSource: "6",
+      externalOracle: "0x160CAed03795365F3A589f10C379FfA7d75d4E76",
+      repointedAsset: "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56",
+    },
+    // Ellipsis btcEPS LP
+    {
+      underlying: "0x2a435Ecb3fcC0E316492Dc1cdd62d0F189be5640",
+      priceSource: "6",
+      externalOracle: "0x2477fB288c5b4118315714ad3c7Fd7CC69b00bf9",
+      repointedAsset: "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c",
     },
   ],
 

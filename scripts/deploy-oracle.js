@@ -16,7 +16,7 @@ async function main() {
   console.log("UniswapOracleTWAP deployed to:", oracle.address);
   saveAddress('UniswapOracleTWAP', oracle.address);
 
-  await oracle.deployTransaction.wait(10);
+  await oracle.deployTransaction.wait(15);
   await verifyContract(oracle.address, [configs.twapWindow, configs.baseAsset, basePricePrecision]);
 }
 
