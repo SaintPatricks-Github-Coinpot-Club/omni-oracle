@@ -157,6 +157,15 @@ const createConfig = async (config, configIndex) => {
       break;
     }
 
+    // CURVE_LP
+    case '6': {
+      if (!config.externalOracle) throw Error(`externalOracle not provided for ${tokenConfig.underlying} - ${tokenConfig.symbol}`);
+      if (!config.repointedAsset) throw Error(`repointedAsset not provided for ${tokenConfig.underlying} - ${tokenConfig.symbol}`);
+      tokenConfig.externalOracle = config.externalOracle;
+      tokenConfig.repointedAsset = config.repointedAsset;
+      break;
+    }
+
     default: {
       throw Error(`invalid priceSource for ${tokenConfig.underlying} - ${tokenConfig.symbol}`)
     }

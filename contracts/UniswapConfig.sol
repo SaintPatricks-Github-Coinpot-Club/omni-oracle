@@ -19,7 +19,8 @@ contract UniswapConfig is Administrable {
         POSTER,             /// implies the price is posted externally
         EXTERNAL_ORACLE,    /// implies the price is read externally
         REPOINT,            /// implies the price is repointed to other asset's price
-        UNI_V2_LP           /// implies the price is computed as UniV2 LP pair
+        UNI_V2_LP,          /// implies the price is computed as UniV2 LP pair
+        CURVE_LP            /// implies the price is computed as Curve Finance LP
     }
 
     /// @dev Describe how the USD price should be determined for an asset.

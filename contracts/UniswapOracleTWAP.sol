@@ -10,6 +10,7 @@ import "./PosterAccessControl.sol";
 import "./UniswapHelper.sol";
 import "./IExternalOracle.sol";
 import "./IERC20Extended.sol";
+import "./ICurvePool.sol";
 
 struct Observation {
     uint timestamp;
@@ -111,6 +112,11 @@ contract UniswapOracleTWAP is UniswapLpPrice, UniswapConfig, PosterAccessControl
             getTokenConfigByUnderlying(pair.token0());
             getTokenConfigByUnderlying(pair.token1());
         }
+        if (config.priceSource == PriceSource.CURVE_LP) {
+            require(config.externalOracle != address(0), "must have externalOracle");
+            require(config.repointedAsset != address(0), "must have repointedAsset");
+            getTokenConfigByUnderlying(config.repointedAsset);
+        }
     }
 
     function _setConfigs(TokenConfig[] memory configs) external {
@@ -182,6 +188,11 @@ contract UniswapOracleTWAP is UniswapLpPrice, UniswapConfig, PosterAccessControl
         if (config.priceSource == PriceSource.REPOINT) return price(config.repointedAsset);
         if (config.priceSource == PriceSource.UNI_V2_LP)
             return getPairTokenPriceUsd(config.underlying, config.uniLpCalcParams);
+        if (config.priceSource == PriceSource.CURVE_LP) {
+            uint virtualPrice = ICurvePool(config.externalOracle).get_virtual_price();
+            uint baseAssetPrice = price(config.repointedAsset);
+            return mul(virtualPrice, baseAssetPrice) / basePricePrecision;
+        }
     }
 
     /**
@@ -280,6 +291,9 @@ contract UniswapOracleTWAP is UniswapLpPrice, UniswapConfig, PosterAccessControl
             IUniswapV2Pair pair = IUniswapV2Pair(config.underlying);
             updateUnderlyingPrice(pair.token0());
             updateUnderlyingPrice(pair.token1());
+        }
+        if (config.priceSource == PriceSource.CURVE_LP) {
+            updateUnderlyingPrice(config.repointedAsset);
         }
     }
 
