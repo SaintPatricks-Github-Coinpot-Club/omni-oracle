@@ -22,6 +22,10 @@ module.exports = {
       url: process.env.metisRpc || "https://andromeda.metis.io/?owner=1088",
       accounts: [privateKey],
     },
+    avalanche: {
+      url: process.env.avalancheRpc || "https://api.avax.network/ext/bc/C/rpc",
+      accounts: [privateKey],
+    },
   },
   solidity: {
     version: "0.6.12",
