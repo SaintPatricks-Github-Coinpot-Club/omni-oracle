@@ -117,6 +117,9 @@ const getMappedCTokensArr = async (oracleAddr) => {
   const response = await axios.post(endpoint, JSON.stringify({ query }), {
     headers: headers
   });
+  // return empty array if we can't find data 
+  if (response.data.errors && response.data.errors.length > 0) return [];
+
   const eventData = response.data.data.ethereum.smartContractEvents;
   const sorted = eventData.sort((a, b) => {
     if (a.block.height !== b.block.height) return 0

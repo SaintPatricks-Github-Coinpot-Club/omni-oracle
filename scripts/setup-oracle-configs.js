@@ -22,7 +22,14 @@ async function main() {
 
 const isValidBaseConfig = async () => {
   const RouterI = new hre.ethers.Contract(configs.UniswapV2Router, RouterAbi, hre.ethers.provider.getSigner());
-  const weth = await RouterI.WETH();
+  let weth;
+  try {
+    weth = await RouterI.WETH();
+  } catch (e) {
+    const tempAbi = [`function ${configs.baseAsset}() view returns (address)`];
+    const TempRouterI = new hre.ethers.Contract(configs.UniswapV2Router, tempAbi, hre.ethers.provider.getSigner());
+    weth = await TempRouterI[`${configs.baseAsset}()`]();
+  }
   if (configs.tokenConfigs[0].underlying.toLowerCase() !== weth.toLowerCase()) throw Error("Base config incorrect underlying");
   if (configs.tokenConfigs[0].symbol) {
     const WethI = new hre.ethers.Contract(weth, Erc20Abi, hre.ethers.provider.getSigner());
@@ -106,7 +113,14 @@ const createConfig = async (config, configIndex) => {
     // UNISWAP
     case '1': {
       const RouterI = new hre.ethers.Contract(configs.UniswapV2Router, RouterAbi, hre.ethers.provider.getSigner());
-      const weth = await RouterI.WETH();
+      let weth;
+      try {
+        weth = await RouterI.WETH();
+      } catch (e) {
+        const tempAbi = [`function ${configs.baseAsset}() view returns (address)`];
+        const TempRouterI = new hre.ethers.Contract(configs.UniswapV2Router, tempAbi, hre.ethers.provider.getSigner());
+        weth = await TempRouterI[`${configs.baseAsset}()`]();
+      }
 
       if (config.uniswapMarket) {
         tokenConfig.uniswapMarket = config.uniswapMarket;
